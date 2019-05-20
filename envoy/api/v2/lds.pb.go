@@ -7,10 +7,8 @@ import (
 	bytes "bytes"
 	context "context"
 	fmt "fmt"
-	io "io"
-	math "math"
-	time "time"
-
+	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
+	listener "github.com/envoyproxy/go-control-plane/envoy/api/v2/listener"
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
@@ -18,9 +16,9 @@ import (
 	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
 	types "github.com/gogo/protobuf/types"
 	grpc "google.golang.org/grpc"
-
-	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
-	listener "github.com/envoyproxy/go-control-plane/envoy/api/v2/listener"
+	io "io"
+	math "math"
+	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -70,9 +68,6 @@ type Listener struct {
 	// The unique name by which this listener is known. If no name is provided,
 	// Envoy will allocate an internal UUID for the listener. If the listener is to be dynamically
 	// updated or removed via :ref:`LDS <config_listeners_lds>` a unique name must be provided.
-	// By default, the maximum length of a listener's name is limited to 60 characters. This limit can
-	// be increased by setting the :option:`--max-obj-name-len` command line argument to the desired
-	// value.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// The address that the listener should listen on. In general, the address must be unique, though
 	// that is governed by the bind rules of the OS. E.g., multiple listeners can listen on port 0 on

@@ -7,10 +7,10 @@ import (
 	bytes "bytes"
 	context "context"
 	fmt "fmt"
-	io "io"
-	math "math"
-	time "time"
-
+	auth "github.com/envoyproxy/go-control-plane/envoy/api/v2/auth"
+	cluster "github.com/envoyproxy/go-control-plane/envoy/api/v2/cluster"
+	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
+	_type "github.com/envoyproxy/go-control-plane/envoy/type"
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
@@ -19,11 +19,9 @@ import (
 	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
 	types "github.com/gogo/protobuf/types"
 	grpc "google.golang.org/grpc"
-
-	auth "github.com/envoyproxy/go-control-plane/envoy/api/v2/auth"
-	cluster "github.com/envoyproxy/go-control-plane/envoy/api/v2/cluster"
-	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
-	_type "github.com/envoyproxy/go-control-plane/envoy/type"
+	io "io"
+	math "math"
+	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -281,9 +279,6 @@ type Cluster struct {
 	// :ref:`statistics <config_cluster_manager_cluster_stats>` if :ref:`alt_stat_name
 	// <envoy_api_field_Cluster.alt_stat_name>` is not provided.
 	// Any ``:`` in the cluster name will be converted to ``_`` when emitting statistics.
-	// By default, the maximum length of a cluster name is limited to 60
-	// characters. This limit can be increased by setting the
-	// :option:`--max-obj-name-len` command line argument to the desired value.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// An optional alternative to the cluster name to be used while emitting stats.
 	// Any ``:`` in the name will be converted to ``_`` when emitting statistics. This should not be
@@ -321,7 +316,7 @@ type Cluster struct {
 	// :ref:`STRICT_DNS<envoy_api_enum_value_Cluster.DiscoveryType.STRICT_DNS>`
 	// or :ref:`LOGICAL_DNS<envoy_api_enum_value_Cluster.DiscoveryType.LOGICAL_DNS>` clusters.
 	// This field supersedes :ref:`hosts<envoy_api_field_Cluster.hosts>` field.
-	// [#comment:TODO(dio): Deprecate the hosts field and add it to DEPRECATED.md
+	// [#comment:TODO(dio): Deprecate the hosts field and add it to :ref:`deprecated log<deprecated>`
 	// once load_assignment is implemented.]
 	//
 	// .. attention::

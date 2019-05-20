@@ -77,6 +77,23 @@ func (m *CommonExtensionConfig) Validate() error {
 			}
 		}
 
+	case *CommonExtensionConfig_TdsConfig:
+
+		{
+			tmp := m.GetTdsConfig()
+
+			if v, ok := interface{}(tmp).(interface{ Validate() error }); ok {
+
+				if err := v.Validate(); err != nil {
+					return CommonExtensionConfigValidationError{
+						field:  "TdsConfig",
+						reason: "embedded message failed validation",
+						cause:  err,
+					}
+				}
+			}
+		}
+
 	default:
 		return CommonExtensionConfigValidationError{
 			field:  "ConfigType",
@@ -215,3 +232,88 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = AdminConfigValidationError{}
+
+// Validate checks the field values on CommonExtensionConfig_TDSConfig with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *CommonExtensionConfig_TDSConfig) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	{
+		tmp := m.GetConfigSource()
+
+		if v, ok := interface{}(tmp).(interface{ Validate() error }); ok {
+
+			if err := v.Validate(); err != nil {
+				return CommonExtensionConfig_TDSConfigValidationError{
+					field:  "ConfigSource",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+	}
+
+	// no validation rules for Name
+
+	return nil
+}
+
+// CommonExtensionConfig_TDSConfigValidationError is the validation error
+// returned by CommonExtensionConfig_TDSConfig.Validate if the designated
+// constraints aren't met.
+type CommonExtensionConfig_TDSConfigValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CommonExtensionConfig_TDSConfigValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CommonExtensionConfig_TDSConfigValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CommonExtensionConfig_TDSConfigValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CommonExtensionConfig_TDSConfigValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CommonExtensionConfig_TDSConfigValidationError) ErrorName() string {
+	return "CommonExtensionConfig_TDSConfigValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CommonExtensionConfig_TDSConfigValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCommonExtensionConfig_TDSConfig.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CommonExtensionConfig_TDSConfigValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CommonExtensionConfig_TDSConfigValidationError{}

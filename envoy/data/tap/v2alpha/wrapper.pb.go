@@ -5,11 +5,12 @@ package v2
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-
+	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	proto "github.com/gogo/protobuf/proto"
+	types "github.com/gogo/protobuf/types"
+	io "io"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -26,6 +27,9 @@ const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 // Wrapper for all fully buffered and streamed tap traces that Envoy emits. This is required for
 // sending traces over gRPC APIs or more easily persisting binary messages to files.
 type TraceWrapper struct {
+	// if trace is streaming, this may only be sent once.
+	Destination             *TraceWrapper_Destination `protobuf:"bytes,5,opt,name=destination,proto3" json:"destination,omitempty"`
+	DownstreamRemoteAddress *core.Address             `protobuf:"bytes,6,opt,name=downstream_remote_address,json=downstreamRemoteAddress,proto3" json:"downstream_remote_address,omitempty"`
 	// Types that are valid to be assigned to Trace:
 	//	*TraceWrapper_HttpBufferedTrace
 	//	*TraceWrapper_HttpStreamedTraceSegment
@@ -97,6 +101,20 @@ func (*TraceWrapper_SocketStreamedTraceSegment) isTraceWrapper_Trace() {}
 func (m *TraceWrapper) GetTrace() isTraceWrapper_Trace {
 	if m != nil {
 		return m.Trace
+	}
+	return nil
+}
+
+func (m *TraceWrapper) GetDestination() *TraceWrapper_Destination {
+	if m != nil {
+		return m.Destination
+	}
+	return nil
+}
+
+func (m *TraceWrapper) GetDownstreamRemoteAddress() *core.Address {
+	if m != nil {
+		return m.DownstreamRemoteAddress
 	}
 	return nil
 }
@@ -241,8 +259,80 @@ func _TraceWrapper_OneofSizer(msg proto.Message) (n int) {
 	return n
 }
 
+type TraceWrapper_Destination struct {
+	ClusterName          string        `protobuf:"bytes,1,opt,name=cluster_name,json=clusterName,proto3" json:"cluster_name,omitempty"`
+	ClusterMetadata      *types.Struct `protobuf:"bytes,2,opt,name=cluster_metadata,json=clusterMetadata,proto3" json:"cluster_metadata,omitempty"`
+	HostAddress          *core.Address `protobuf:"bytes,3,opt,name=host_address,json=hostAddress,proto3" json:"host_address,omitempty"`
+	HostMetadata         *types.Struct `protobuf:"bytes,4,opt,name=host_metadata,json=hostMetadata,proto3" json:"host_metadata,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *TraceWrapper_Destination) Reset()         { *m = TraceWrapper_Destination{} }
+func (m *TraceWrapper_Destination) String() string { return proto.CompactTextString(m) }
+func (*TraceWrapper_Destination) ProtoMessage()    {}
+func (*TraceWrapper_Destination) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9f617738ad092e1c, []int{0, 0}
+}
+func (m *TraceWrapper_Destination) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *TraceWrapper_Destination) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_TraceWrapper_Destination.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *TraceWrapper_Destination) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TraceWrapper_Destination.Merge(m, src)
+}
+func (m *TraceWrapper_Destination) XXX_Size() int {
+	return m.Size()
+}
+func (m *TraceWrapper_Destination) XXX_DiscardUnknown() {
+	xxx_messageInfo_TraceWrapper_Destination.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TraceWrapper_Destination proto.InternalMessageInfo
+
+func (m *TraceWrapper_Destination) GetClusterName() string {
+	if m != nil {
+		return m.ClusterName
+	}
+	return ""
+}
+
+func (m *TraceWrapper_Destination) GetClusterMetadata() *types.Struct {
+	if m != nil {
+		return m.ClusterMetadata
+	}
+	return nil
+}
+
+func (m *TraceWrapper_Destination) GetHostAddress() *core.Address {
+	if m != nil {
+		return m.HostAddress
+	}
+	return nil
+}
+
+func (m *TraceWrapper_Destination) GetHostMetadata() *types.Struct {
+	if m != nil {
+		return m.HostMetadata
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*TraceWrapper)(nil), "envoy.data.tap.v2alpha.TraceWrapper")
+	proto.RegisterType((*TraceWrapper_Destination)(nil), "envoy.data.tap.v2alpha.TraceWrapper.Destination")
 }
 
 func init() {
@@ -250,28 +340,40 @@ func init() {
 }
 
 var fileDescriptor_9f617738ad092e1c = []byte{
-	// 321 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x92, 0xcf, 0x4e, 0xc2, 0x30,
-	0x1c, 0xc7, 0xa9, 0x88, 0x87, 0x4a, 0x4c, 0x2c, 0x51, 0x09, 0x46, 0xa2, 0x86, 0x18, 0x8d, 0x49,
-	0x67, 0xf0, 0x0d, 0x76, 0xe2, 0x48, 0xc0, 0xc4, 0x83, 0x07, 0xf2, 0x83, 0x15, 0x47, 0x84, 0xb5,
-	0xb6, 0x3f, 0x87, 0xbc, 0x99, 0x47, 0x8f, 0xc6, 0x93, 0x8f, 0x60, 0x76, 0xf3, 0x2d, 0xcc, 0xba,
-	0x72, 0x99, 0x96, 0xdb, 0xd2, 0xef, 0x9f, 0x4f, 0xbf, 0x59, 0x69, 0x47, 0x24, 0xa9, 0x5c, 0x05,
-	0x11, 0x20, 0x04, 0x08, 0x2a, 0x48, 0xbb, 0x30, 0x57, 0x31, 0x04, 0x4b, 0x0d, 0x4a, 0x09, 0xcd,
-	0x95, 0x96, 0x28, 0xd9, 0xa1, 0x75, 0xf1, 0xdc, 0xc5, 0x11, 0x14, 0x77, 0xae, 0xd6, 0x99, 0x27,
-	0x1d, 0x23, 0xaa, 0x22, 0xda, 0xba, 0xf0, 0x58, 0x50, 0x43, 0x62, 0x94, 0xd4, 0xe8, 0x7c, 0x47,
-	0x29, 0xcc, 0x67, 0x11, 0xa0, 0x08, 0xd6, 0x1f, 0x85, 0x70, 0xfe, 0x59, 0xa5, 0xf5, 0x3b, 0x0d,
-	0x13, 0x71, 0x5f, 0x5c, 0x89, 0x3d, 0xd0, 0x46, 0xde, 0x3f, 0x1a, 0xbf, 0x4c, 0xa7, 0x42, 0x8b,
-	0x68, 0x84, 0xb9, 0xda, 0x24, 0xa7, 0xe4, 0x72, 0xb7, 0x7b, 0xc5, 0xff, 0xbf, 0x2a, 0xef, 0x21,
-	0xaa, 0xd0, 0x25, 0x6c, 0x5d, 0xaf, 0x32, 0xd8, 0x8f, 0xcb, 0x87, 0xec, 0x99, 0x1e, 0xdb, 0x72,
-	0x83, 0x5a, 0xc0, 0x62, 0x5d, 0x3e, 0x32, 0xe2, 0x71, 0x21, 0x12, 0x6c, 0x6e, 0x59, 0xc8, 0xcd,
-	0x26, 0xc8, 0xd0, 0x25, 0x6d, 0xdf, 0xb0, 0xc8, 0xf5, 0x2a, 0x83, 0x66, 0xec, 0xd1, 0x18, 0xd0,
-	0x03, 0x23, 0x27, 0x4f, 0x02, 0xcb, 0x8b, 0xaa, 0x16, 0x76, 0xed, 0x83, 0x0d, 0x6d, 0xa8, 0xbc,
-	0xa9, 0x61, 0xfe, 0x1e, 0xb3, 0x25, 0x3d, 0x71, 0x08, 0xcf, 0xae, 0x6d, 0x8b, 0xea, 0x6e, 0x46,
-	0x79, 0x96, 0xb5, 0x8c, 0x57, 0x0d, 0xf7, 0x68, 0xcd, 0x82, 0x58, 0xed, 0xed, 0xe7, 0xbd, 0x4a,
-	0xc2, 0xf0, 0x23, 0x6b, 0x93, 0xaf, 0xac, 0x4d, 0xbe, 0xb3, 0x36, 0xa1, 0x9d, 0x99, 0x2c, 0x88,
-	0x4a, 0xcb, 0xd7, 0x95, 0x07, 0x1e, 0xd6, 0xdd, 0x8f, 0xef, 0xe7, 0xcf, 0xa1, 0x4f, 0xc6, 0x3b,
-	0xf6, 0x5d, 0xdc, 0xfe, 0x06, 0x00, 0x00, 0xff, 0xff, 0x23, 0x13, 0x37, 0xbc, 0xbb, 0x02, 0x00,
-	0x00,
+	// 518 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x93, 0x4f, 0x8f, 0x12, 0x4d,
+	0x10, 0xc6, 0x77, 0x5e, 0x16, 0x92, 0xb7, 0xc1, 0x7f, 0xbd, 0x51, 0x10, 0x15, 0x5d, 0xb3, 0x31,
+	0x1a, 0x93, 0x6e, 0x83, 0x57, 0x3d, 0x38, 0xf1, 0xc0, 0x45, 0xb3, 0x19, 0x8c, 0x1e, 0x3c, 0x4c,
+	0x0a, 0xa6, 0x81, 0x89, 0xcc, 0x74, 0xdb, 0x5d, 0x0c, 0xee, 0x37, 0xf3, 0xe8, 0xd1, 0xa3, 0x1f,
+	0xc1, 0x70, 0xd3, 0x9b, 0xdf, 0xc0, 0x4c, 0x77, 0xcf, 0x2e, 0x41, 0x07, 0x6f, 0xd0, 0xf5, 0x3c,
+	0xf5, 0xab, 0xaa, 0xa9, 0x22, 0x27, 0x22, 0x2f, 0xe4, 0x19, 0x4f, 0x00, 0x81, 0x23, 0x28, 0x5e,
+	0x0c, 0x61, 0xa9, 0x16, 0xc0, 0xd7, 0x1a, 0x94, 0x12, 0x9a, 0x29, 0x2d, 0x51, 0xd2, 0x1b, 0x56,
+	0xc5, 0x4a, 0x15, 0x43, 0x50, 0xcc, 0xab, 0xfa, 0xc7, 0x35, 0xee, 0x05, 0xa2, 0x72, 0xd6, 0xfe,
+	0x83, 0x1a, 0x09, 0x6a, 0xc8, 0x8d, 0x92, 0x1a, 0xbd, 0xee, 0xf6, 0x5c, 0xca, 0xf9, 0x52, 0x70,
+	0xfb, 0x6f, 0xb2, 0x9a, 0x71, 0x83, 0x7a, 0x35, 0xad, 0xa2, 0x77, 0x5d, 0x16, 0x50, 0x29, 0x2f,
+	0x86, 0x7c, 0x2a, 0xb5, 0xe0, 0x90, 0x24, 0x5a, 0x18, 0xe3, 0x05, 0xdd, 0x02, 0x96, 0x69, 0x02,
+	0x28, 0x78, 0xf5, 0xc3, 0x05, 0xee, 0xff, 0x6c, 0x91, 0xce, 0x1b, 0x0d, 0x53, 0xf1, 0xce, 0x75,
+	0x44, 0x23, 0xd2, 0x4e, 0x84, 0xc1, 0x34, 0x07, 0x4c, 0x65, 0xde, 0x6b, 0xde, 0x0b, 0x1e, 0xb6,
+	0x87, 0x4f, 0xd8, 0xdf, 0x3b, 0x64, 0xdb, 0x56, 0xf6, 0xf2, 0xc2, 0x17, 0x6d, 0x27, 0xa1, 0x6f,
+	0xc9, 0xcd, 0x44, 0xae, 0x73, 0x83, 0x5a, 0x40, 0x16, 0x6b, 0x91, 0x49, 0x14, 0xb1, 0x2f, 0xb0,
+	0xd7, 0xb2, 0x84, 0xbe, 0x27, 0x80, 0x4a, 0x59, 0x31, 0x64, 0x65, 0x0b, 0xec, 0x85, 0x53, 0x44,
+	0xdd, 0x0b, 0x73, 0x64, 0xbd, 0x3e, 0x40, 0xdf, 0x93, 0xa3, 0x72, 0x94, 0xf1, 0x64, 0x35, 0x9b,
+	0x09, 0x2d, 0x92, 0x18, 0xcb, 0x72, 0x7a, 0x81, 0xcd, 0xf8, 0xa8, 0xae, 0xe6, 0x11, 0xa2, 0x0a,
+	0xbd, 0xc3, 0xd6, 0x3f, 0x3a, 0x88, 0xae, 0x2d, 0x76, 0x1f, 0xe9, 0x47, 0x72, 0xcb, 0x26, 0x77,
+	0xe0, 0x2a, 0x79, 0x6c, 0xc4, 0x3c, 0x13, 0x39, 0xf6, 0xfe, 0xdb, 0x3f, 0x98, 0x12, 0x32, 0xf6,
+	0x4e, 0x9b, 0x6f, 0xec, 0x7c, 0xa3, 0x83, 0xa8, 0xb7, 0xa8, 0x89, 0x51, 0x20, 0xd7, 0x8d, 0x9c,
+	0x7e, 0x10, 0xb8, 0xdb, 0x51, 0xc3, 0xc2, 0x1e, 0xd7, 0xc1, 0xc6, 0xd6, 0xb4, 0xdb, 0xd3, 0x91,
+	0xf9, 0xf3, 0x99, 0xae, 0xc9, 0x1d, 0x8f, 0xa8, 0xe9, 0xeb, 0xd0, 0xa2, 0x86, 0xfb, 0x51, 0x35,
+	0x9d, 0xf5, 0x4d, 0x6d, 0xb4, 0xff, 0x2b, 0x20, 0xed, 0xad, 0x05, 0xa1, 0xc7, 0xa4, 0x33, 0x5d,
+	0xae, 0x0c, 0x0a, 0x1d, 0xe7, 0x90, 0xb9, 0x8f, 0xf6, 0x7f, 0xd4, 0xf6, 0x6f, 0xaf, 0x21, 0x13,
+	0x34, 0x24, 0x57, 0x2b, 0x49, 0x26, 0x10, 0xca, 0x5a, 0xfc, 0xd8, 0xbb, 0xcc, 0x9d, 0x03, 0xab,
+	0xce, 0x81, 0x8d, 0xed, 0x39, 0x44, 0x57, 0xbc, 0xe1, 0x95, 0xd7, 0xd3, 0xe7, 0xa4, 0xb3, 0x90,
+	0x06, 0xcf, 0xb7, 0xad, 0xf1, 0xcf, 0x6d, 0x6b, 0x97, 0xfa, 0x6a, 0xc3, 0x9e, 0x91, 0x4b, 0xd6,
+	0x7e, 0xce, 0x3f, 0xdc, 0xcf, 0xb7, 0xb0, 0x0a, 0x1e, 0x5e, 0x26, 0x4d, 0x3b, 0x5c, 0xda, 0xfc,
+	0xfc, 0xe3, 0x4b, 0x23, 0x08, 0xc3, 0xaf, 0x9b, 0x41, 0xf0, 0x6d, 0x33, 0x08, 0xbe, 0x6f, 0x06,
+	0x01, 0x39, 0x49, 0xa5, 0x2b, 0x43, 0x69, 0xf9, 0xe9, 0xac, 0x66, 0xe0, 0x61, 0xc7, 0x5f, 0xd7,
+	0x69, 0x49, 0x3a, 0x0d, 0x26, 0x2d, 0x8b, 0x7c, 0xfa, 0x3b, 0x00, 0x00, 0xff, 0xff, 0x6a, 0x84,
+	0x0e, 0x12, 0x9a, 0x04, 0x00, 0x00,
 }
 
 func (m *TraceWrapper) Marshal() (dAtA []byte, err error) {
@@ -296,6 +398,26 @@ func (m *TraceWrapper) MarshalTo(dAtA []byte) (int, error) {
 		}
 		i += nn1
 	}
+	if m.Destination != nil {
+		dAtA[i] = 0x2a
+		i++
+		i = encodeVarintWrapper(dAtA, i, uint64(m.Destination.Size()))
+		n2, err := m.Destination.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n2
+	}
+	if m.DownstreamRemoteAddress != nil {
+		dAtA[i] = 0x32
+		i++
+		i = encodeVarintWrapper(dAtA, i, uint64(m.DownstreamRemoteAddress.Size()))
+		n3, err := m.DownstreamRemoteAddress.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n3
+	}
 	if m.XXX_unrecognized != nil {
 		i += copy(dAtA[i:], m.XXX_unrecognized)
 	}
@@ -308,11 +430,11 @@ func (m *TraceWrapper_HttpBufferedTrace) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0xa
 		i++
 		i = encodeVarintWrapper(dAtA, i, uint64(m.HttpBufferedTrace.Size()))
-		n2, err := m.HttpBufferedTrace.MarshalTo(dAtA[i:])
+		n4, err := m.HttpBufferedTrace.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n2
+		i += n4
 	}
 	return i, nil
 }
@@ -322,11 +444,11 @@ func (m *TraceWrapper_HttpStreamedTraceSegment) MarshalTo(dAtA []byte) (int, err
 		dAtA[i] = 0x12
 		i++
 		i = encodeVarintWrapper(dAtA, i, uint64(m.HttpStreamedTraceSegment.Size()))
-		n3, err := m.HttpStreamedTraceSegment.MarshalTo(dAtA[i:])
+		n5, err := m.HttpStreamedTraceSegment.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n3
+		i += n5
 	}
 	return i, nil
 }
@@ -336,11 +458,11 @@ func (m *TraceWrapper_SocketBufferedTrace) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0x1a
 		i++
 		i = encodeVarintWrapper(dAtA, i, uint64(m.SocketBufferedTrace.Size()))
-		n4, err := m.SocketBufferedTrace.MarshalTo(dAtA[i:])
+		n6, err := m.SocketBufferedTrace.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n4
+		i += n6
 	}
 	return i, nil
 }
@@ -350,14 +472,71 @@ func (m *TraceWrapper_SocketStreamedTraceSegment) MarshalTo(dAtA []byte) (int, e
 		dAtA[i] = 0x22
 		i++
 		i = encodeVarintWrapper(dAtA, i, uint64(m.SocketStreamedTraceSegment.Size()))
-		n5, err := m.SocketStreamedTraceSegment.MarshalTo(dAtA[i:])
+		n7, err := m.SocketStreamedTraceSegment.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n5
+		i += n7
 	}
 	return i, nil
 }
+func (m *TraceWrapper_Destination) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TraceWrapper_Destination) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.ClusterName) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintWrapper(dAtA, i, uint64(len(m.ClusterName)))
+		i += copy(dAtA[i:], m.ClusterName)
+	}
+	if m.ClusterMetadata != nil {
+		dAtA[i] = 0x12
+		i++
+		i = encodeVarintWrapper(dAtA, i, uint64(m.ClusterMetadata.Size()))
+		n8, err := m.ClusterMetadata.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n8
+	}
+	if m.HostAddress != nil {
+		dAtA[i] = 0x1a
+		i++
+		i = encodeVarintWrapper(dAtA, i, uint64(m.HostAddress.Size()))
+		n9, err := m.HostAddress.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n9
+	}
+	if m.HostMetadata != nil {
+		dAtA[i] = 0x22
+		i++
+		i = encodeVarintWrapper(dAtA, i, uint64(m.HostMetadata.Size()))
+		n10, err := m.HostMetadata.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n10
+	}
+	if m.XXX_unrecognized != nil {
+		i += copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	return i, nil
+}
+
 func encodeVarintWrapper(dAtA []byte, offset int, v uint64) int {
 	for v >= 1<<7 {
 		dAtA[offset] = uint8(v&0x7f | 0x80)
@@ -375,6 +554,14 @@ func (m *TraceWrapper) Size() (n int) {
 	_ = l
 	if m.Trace != nil {
 		n += m.Trace.Size()
+	}
+	if m.Destination != nil {
+		l = m.Destination.Size()
+		n += 1 + l + sovWrapper(uint64(l))
+	}
+	if m.DownstreamRemoteAddress != nil {
+		l = m.DownstreamRemoteAddress.Size()
+		n += 1 + l + sovWrapper(uint64(l))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -427,6 +614,33 @@ func (m *TraceWrapper_SocketStreamedTraceSegment) Size() (n int) {
 	if m.SocketStreamedTraceSegment != nil {
 		l = m.SocketStreamedTraceSegment.Size()
 		n += 1 + l + sovWrapper(uint64(l))
+	}
+	return n
+}
+func (m *TraceWrapper_Destination) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ClusterName)
+	if l > 0 {
+		n += 1 + l + sovWrapper(uint64(l))
+	}
+	if m.ClusterMetadata != nil {
+		l = m.ClusterMetadata.Size()
+		n += 1 + l + sovWrapper(uint64(l))
+	}
+	if m.HostAddress != nil {
+		l = m.HostAddress.Size()
+		n += 1 + l + sovWrapper(uint64(l))
+	}
+	if m.HostMetadata != nil {
+		l = m.HostMetadata.Size()
+		n += 1 + l + sovWrapper(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
 	}
 	return n
 }
@@ -612,6 +826,272 @@ func (m *TraceWrapper) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.Trace = &TraceWrapper_SocketStreamedTraceSegment{v}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Destination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowWrapper
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Destination == nil {
+				m.Destination = &TraceWrapper_Destination{}
+			}
+			if err := m.Destination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DownstreamRemoteAddress", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowWrapper
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.DownstreamRemoteAddress == nil {
+				m.DownstreamRemoteAddress = &core.Address{}
+			}
+			if err := m.DownstreamRemoteAddress.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipWrapper(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TraceWrapper_Destination) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowWrapper
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Destination: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Destination: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClusterName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowWrapper
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ClusterName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClusterMetadata", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowWrapper
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ClusterMetadata == nil {
+				m.ClusterMetadata = &types.Struct{}
+			}
+			if err := m.ClusterMetadata.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HostAddress", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowWrapper
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HostAddress == nil {
+				m.HostAddress = &core.Address{}
+			}
+			if err := m.HostAddress.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HostMetadata", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowWrapper
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthWrapper
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HostMetadata == nil {
+				m.HostMetadata = &types.Struct{}
+			}
+			if err := m.HostMetadata.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

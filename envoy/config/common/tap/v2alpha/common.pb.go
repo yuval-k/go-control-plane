@@ -5,13 +5,12 @@ package envoy_config_common_tap_v2alpha
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-
+	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
+	v2alpha "github.com/envoyproxy/go-control-plane/envoy/service/tap/v2alpha"
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	proto "github.com/gogo/protobuf/proto"
-
-	v2alpha "github.com/envoyproxy/go-control-plane/envoy/service/tap/v2alpha"
+	io "io"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -30,6 +29,7 @@ type CommonExtensionConfig struct {
 	// Types that are valid to be assigned to ConfigType:
 	//	*CommonExtensionConfig_AdminConfig
 	//	*CommonExtensionConfig_StaticConfig
+	//	*CommonExtensionConfig_TdsConfig
 	ConfigType           isCommonExtensionConfig_ConfigType `protobuf_oneof:"config_type"`
 	XXX_NoUnkeyedLiteral struct{}                           `json:"-"`
 	XXX_unrecognized     []byte                             `json:"-"`
@@ -81,9 +81,13 @@ type CommonExtensionConfig_AdminConfig struct {
 type CommonExtensionConfig_StaticConfig struct {
 	StaticConfig *v2alpha.TapConfig `protobuf:"bytes,2,opt,name=static_config,json=staticConfig,proto3,oneof"`
 }
+type CommonExtensionConfig_TdsConfig struct {
+	TdsConfig *CommonExtensionConfig_TDSConfig `protobuf:"bytes,3,opt,name=tds_config,json=tdsConfig,proto3,oneof"`
+}
 
 func (*CommonExtensionConfig_AdminConfig) isCommonExtensionConfig_ConfigType()  {}
 func (*CommonExtensionConfig_StaticConfig) isCommonExtensionConfig_ConfigType() {}
+func (*CommonExtensionConfig_TdsConfig) isCommonExtensionConfig_ConfigType()    {}
 
 func (m *CommonExtensionConfig) GetConfigType() isCommonExtensionConfig_ConfigType {
 	if m != nil {
@@ -106,11 +110,19 @@ func (m *CommonExtensionConfig) GetStaticConfig() *v2alpha.TapConfig {
 	return nil
 }
 
+func (m *CommonExtensionConfig) GetTdsConfig() *CommonExtensionConfig_TDSConfig {
+	if x, ok := m.GetConfigType().(*CommonExtensionConfig_TdsConfig); ok {
+		return x.TdsConfig
+	}
+	return nil
+}
+
 // XXX_OneofFuncs is for the internal use of the proto package.
 func (*CommonExtensionConfig) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
 	return _CommonExtensionConfig_OneofMarshaler, _CommonExtensionConfig_OneofUnmarshaler, _CommonExtensionConfig_OneofSizer, []interface{}{
 		(*CommonExtensionConfig_AdminConfig)(nil),
 		(*CommonExtensionConfig_StaticConfig)(nil),
+		(*CommonExtensionConfig_TdsConfig)(nil),
 	}
 }
 
@@ -126,6 +138,11 @@ func _CommonExtensionConfig_OneofMarshaler(msg proto.Message, b *proto.Buffer) e
 	case *CommonExtensionConfig_StaticConfig:
 		_ = b.EncodeVarint(2<<3 | proto.WireBytes)
 		if err := b.EncodeMessage(x.StaticConfig); err != nil {
+			return err
+		}
+	case *CommonExtensionConfig_TdsConfig:
+		_ = b.EncodeVarint(3<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.TdsConfig); err != nil {
 			return err
 		}
 	case nil:
@@ -154,6 +171,14 @@ func _CommonExtensionConfig_OneofUnmarshaler(msg proto.Message, tag, wire int, b
 		err := b.DecodeMessage(msg)
 		m.ConfigType = &CommonExtensionConfig_StaticConfig{msg}
 		return true, err
+	case 3: // config_type.tds_config
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(CommonExtensionConfig_TDSConfig)
+		err := b.DecodeMessage(msg)
+		m.ConfigType = &CommonExtensionConfig_TdsConfig{msg}
+		return true, err
 	default:
 		return false, nil
 	}
@@ -173,11 +198,76 @@ func _CommonExtensionConfig_OneofSizer(msg proto.Message) (n int) {
 		n += 1 // tag and wire
 		n += proto.SizeVarint(uint64(s))
 		n += s
+	case *CommonExtensionConfig_TdsConfig:
+		s := proto.Size(x.TdsConfig)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
 	case nil:
 	default:
 		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
 	}
 	return n
+}
+
+// Only valid when discovery type is EDS.
+type CommonExtensionConfig_TDSConfig struct {
+	// Configuration for the source of EDS updates for this Cluster.
+	ConfigSource *core.ConfigSource `protobuf:"bytes,1,opt,name=config_source,json=configSource,proto3" json:"config_source,omitempty"`
+	// Optional alternative to cluster name to present to EDS. This does not
+	// have the same restrictions as cluster name, i.e. it may be arbitrary
+	// length.
+	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CommonExtensionConfig_TDSConfig) Reset()         { *m = CommonExtensionConfig_TDSConfig{} }
+func (m *CommonExtensionConfig_TDSConfig) String() string { return proto.CompactTextString(m) }
+func (*CommonExtensionConfig_TDSConfig) ProtoMessage()    {}
+func (*CommonExtensionConfig_TDSConfig) Descriptor() ([]byte, []int) {
+	return fileDescriptor_79cf139d98a2fe3f, []int{0, 0}
+}
+func (m *CommonExtensionConfig_TDSConfig) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CommonExtensionConfig_TDSConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CommonExtensionConfig_TDSConfig.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CommonExtensionConfig_TDSConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CommonExtensionConfig_TDSConfig.Merge(m, src)
+}
+func (m *CommonExtensionConfig_TDSConfig) XXX_Size() int {
+	return m.Size()
+}
+func (m *CommonExtensionConfig_TDSConfig) XXX_DiscardUnknown() {
+	xxx_messageInfo_CommonExtensionConfig_TDSConfig.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CommonExtensionConfig_TDSConfig proto.InternalMessageInfo
+
+func (m *CommonExtensionConfig_TDSConfig) GetConfigSource() *core.ConfigSource {
+	if m != nil {
+		return m.ConfigSource
+	}
+	return nil
+}
+
+func (m *CommonExtensionConfig_TDSConfig) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
 }
 
 // Configuration for the admin handler. See :ref:`here <config_http_filters_tap_admin_handler>` for
@@ -233,6 +323,7 @@ func (m *AdminConfig) GetConfigId() string {
 
 func init() {
 	proto.RegisterType((*CommonExtensionConfig)(nil), "envoy.config.common.tap.v2alpha.CommonExtensionConfig")
+	proto.RegisterType((*CommonExtensionConfig_TDSConfig)(nil), "envoy.config.common.tap.v2alpha.CommonExtensionConfig.TDSConfig")
 	proto.RegisterType((*AdminConfig)(nil), "envoy.config.common.tap.v2alpha.AdminConfig")
 }
 
@@ -241,26 +332,32 @@ func init() {
 }
 
 var fileDescriptor_79cf139d98a2fe3f = []byte{
-	// 295 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xd2, 0x49, 0xcd, 0x2b, 0xcb,
-	0xaf, 0xd4, 0x4f, 0xce, 0xcf, 0x4b, 0xcb, 0x4c, 0xd7, 0x4f, 0xce, 0xcf, 0xcd, 0xcd, 0xcf, 0xd3,
-	0x2f, 0x49, 0x2c, 0xd0, 0x2f, 0x33, 0x4a, 0xcc, 0x29, 0xc8, 0x48, 0x84, 0x0a, 0xe9, 0x15, 0x14,
-	0xe5, 0x97, 0xe4, 0x0b, 0xc9, 0x83, 0x55, 0xeb, 0x41, 0x54, 0xeb, 0x41, 0xa5, 0x4a, 0x12, 0x0b,
-	0xf4, 0xa0, 0xaa, 0xa5, 0xd4, 0x20, 0xc6, 0x15, 0xa7, 0x16, 0x95, 0x65, 0x26, 0xa7, 0xe2, 0x34,
-	0x48, 0x4a, 0xbc, 0x2c, 0x31, 0x27, 0x33, 0x25, 0xb1, 0x24, 0x55, 0x1f, 0xc6, 0x80, 0x48, 0x28,
-	0x9d, 0x65, 0xe4, 0x12, 0x75, 0x06, 0xab, 0x74, 0xad, 0x28, 0x49, 0xcd, 0x2b, 0xce, 0xcc, 0xcf,
-	0x73, 0x06, 0xdb, 0x26, 0x14, 0xc8, 0xc5, 0x93, 0x98, 0x92, 0x9b, 0x99, 0x17, 0x0f, 0xb1, 0x5d,
-	0x82, 0x51, 0x81, 0x51, 0x83, 0xdb, 0x48, 0x47, 0x8f, 0x80, 0x93, 0xf4, 0x1c, 0x41, 0x9a, 0x20,
-	0x66, 0x78, 0x30, 0x04, 0x71, 0x27, 0x22, 0xb8, 0x42, 0xde, 0x5c, 0xbc, 0xc5, 0x25, 0x89, 0x25,
-	0x99, 0xc9, 0x30, 0x33, 0x99, 0xc0, 0x66, 0xaa, 0x40, 0xcd, 0x84, 0xfa, 0x02, 0xc5, 0xb4, 0x90,
-	0xc4, 0x02, 0xb8, 0x59, 0x3c, 0x10, 0xcd, 0x10, 0xbe, 0x93, 0x08, 0x17, 0x37, 0xc4, 0x94, 0xf8,
-	0x92, 0xca, 0x82, 0x54, 0x21, 0xd6, 0x1d, 0x2f, 0x0f, 0x30, 0x33, 0x2a, 0x99, 0x72, 0x71, 0x23,
-	0x39, 0x40, 0x48, 0x8d, 0x8b, 0x13, 0xaa, 0x28, 0x33, 0x05, 0xec, 0x03, 0x4e, 0x27, 0xce, 0x5d,
-	0x2f, 0x0f, 0x30, 0xb3, 0x14, 0x31, 0x29, 0x30, 0x06, 0x71, 0x40, 0xe4, 0x3c, 0x53, 0x9c, 0xbc,
-	0x4e, 0x3c, 0x92, 0x63, 0xbc, 0xf0, 0x48, 0x8e, 0xf1, 0xc1, 0x23, 0x39, 0x46, 0x2e, 0xdd, 0xcc,
-	0x7c, 0x88, 0x93, 0x0a, 0x8a, 0xf2, 0x2b, 0x2a, 0x09, 0xf9, 0xd8, 0x89, 0x1b, 0x12, 0x80, 0x01,
-	0xa0, 0x00, 0x0d, 0x60, 0x4c, 0x62, 0x03, 0x87, 0xac, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0xf6,
-	0x25, 0xf8, 0x92, 0xeb, 0x01, 0x00, 0x00,
+	// 388 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x92, 0xcf, 0x4e, 0xea, 0x40,
+	0x14, 0xc6, 0xef, 0x50, 0xee, 0xcd, 0xed, 0x14, 0x36, 0x93, 0x7b, 0xa3, 0x61, 0x01, 0x84, 0x28,
+	0x71, 0x81, 0xd3, 0xa4, 0xc6, 0xbd, 0x16, 0x4c, 0xfc, 0xb3, 0xc1, 0xc2, 0x9e, 0x8c, 0xed, 0xa8,
+	0x93, 0xd0, 0x99, 0x49, 0x3b, 0x36, 0xf0, 0x24, 0xbe, 0x8a, 0x71, 0xc5, 0xd2, 0xa5, 0x8f, 0x60,
+	0xd8, 0xf1, 0x16, 0x86, 0x99, 0x01, 0x21, 0xd1, 0xb0, 0x9b, 0xd3, 0xf3, 0x9d, 0xdf, 0x39, 0xe7,
+	0xeb, 0x81, 0x1d, 0xca, 0x0b, 0x31, 0xf5, 0x63, 0xc1, 0xef, 0xd9, 0x83, 0x1f, 0x8b, 0x34, 0x15,
+	0xdc, 0x57, 0x44, 0xfa, 0x45, 0x40, 0xc6, 0xf2, 0x91, 0xd8, 0x4f, 0x58, 0x66, 0x42, 0x09, 0xd4,
+	0xd0, 0x6a, 0x6c, 0xd4, 0xd8, 0xa6, 0x14, 0x91, 0xd8, 0xaa, 0x6b, 0x6d, 0x83, 0xcb, 0x69, 0x56,
+	0xb0, 0x98, 0xfe, 0x08, 0xaa, 0x1d, 0x1a, 0x1d, 0x91, 0xcc, 0x2f, 0x02, 0x3f, 0x16, 0x19, 0xb5,
+	0x23, 0x8c, 0x72, 0xf1, 0x94, 0xc5, 0xd4, 0xca, 0xf6, 0x0a, 0x32, 0x66, 0x09, 0x51, 0xd4, 0x5f,
+	0x3d, 0x4c, 0xa2, 0xf5, 0xec, 0xc0, 0xff, 0x5d, 0x0d, 0xbc, 0x98, 0x28, 0xca, 0x73, 0x26, 0x78,
+	0x57, 0xd7, 0xa3, 0x5b, 0x58, 0x21, 0x49, 0xca, 0xf8, 0xc8, 0xf0, 0xf6, 0x41, 0x13, 0x1c, 0x79,
+	0x41, 0x07, 0xef, 0x98, 0x1c, 0x9f, 0x2f, 0x8b, 0x0c, 0xe3, 0xf2, 0x57, 0xe4, 0x91, 0xaf, 0x10,
+	0xdd, 0xc0, 0x6a, 0xae, 0x88, 0x62, 0xf1, 0x8a, 0x59, 0xd2, 0xcc, 0x03, 0xcb, 0xb4, 0xcb, 0x6e,
+	0xd1, 0x86, 0x44, 0xae, 0x59, 0x15, 0x53, 0x6c, 0x61, 0x04, 0x42, 0x95, 0xe4, 0x2b, 0x92, 0xa3,
+	0x49, 0x67, 0x3b, 0xa7, 0xfb, 0x76, 0x57, 0x3c, 0xec, 0x0d, 0xd6, 0x5d, 0x5c, 0x95, 0xe4, 0x26,
+	0xa8, 0x51, 0xe8, 0xae, 0x33, 0xa8, 0x07, 0xab, 0x5b, 0xce, 0x5a, 0x43, 0x1a, 0xb6, 0x25, 0x91,
+	0x0c, 0x17, 0x01, 0x5e, 0xfe, 0x01, 0x6c, 0x2a, 0x06, 0x5a, 0x16, 0x55, 0xe2, 0x8d, 0x08, 0x21,
+	0x58, 0xe6, 0x24, 0xa5, 0x7a, 0x73, 0x37, 0xd2, 0xef, 0xf0, 0x1f, 0xf4, 0x2c, 0x59, 0x4d, 0x25,
+	0x45, 0xbf, 0x5f, 0x16, 0x33, 0x07, 0xb4, 0x4e, 0xa1, 0xb7, 0x61, 0x25, 0x6a, 0x43, 0xd7, 0x8a,
+	0x58, 0xa2, 0x5b, 0xbb, 0xa1, 0xfb, 0xba, 0x98, 0x39, 0xe5, 0xac, 0xd4, 0x04, 0xd1, 0x5f, 0x93,
+	0xbb, 0x4a, 0xc2, 0xeb, 0xb7, 0x79, 0x1d, 0xbc, 0xcf, 0xeb, 0xe0, 0x63, 0x5e, 0x07, 0xf0, 0x98,
+	0x09, 0x33, 0x9f, 0xcc, 0xc4, 0x64, 0xba, 0xcb, 0x9d, 0xd0, 0x33, 0xf6, 0xf4, 0x97, 0xa7, 0xd1,
+	0x07, 0x77, 0x7f, 0xf4, 0x8d, 0x9c, 0x7c, 0x06, 0x00, 0x00, 0xff, 0xff, 0x07, 0x65, 0x71, 0xe7,
+	0xdc, 0x02, 0x00, 0x00,
 }
 
 func (m *CommonExtensionConfig) Marshal() (dAtA []byte, err error) {
@@ -319,6 +416,57 @@ func (m *CommonExtensionConfig_StaticConfig) MarshalTo(dAtA []byte) (int, error)
 	}
 	return i, nil
 }
+func (m *CommonExtensionConfig_TdsConfig) MarshalTo(dAtA []byte) (int, error) {
+	i := 0
+	if m.TdsConfig != nil {
+		dAtA[i] = 0x1a
+		i++
+		i = encodeVarintCommon(dAtA, i, uint64(m.TdsConfig.Size()))
+		n4, err := m.TdsConfig.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n4
+	}
+	return i, nil
+}
+func (m *CommonExtensionConfig_TDSConfig) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CommonExtensionConfig_TDSConfig) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if m.ConfigSource != nil {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintCommon(dAtA, i, uint64(m.ConfigSource.Size()))
+		n5, err := m.ConfigSource.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n5
+	}
+	if len(m.Name) > 0 {
+		dAtA[i] = 0x12
+		i++
+		i = encodeVarintCommon(dAtA, i, uint64(len(m.Name)))
+		i += copy(dAtA[i:], m.Name)
+	}
+	if m.XXX_unrecognized != nil {
+		i += copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	return i, nil
+}
+
 func (m *AdminConfig) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -394,6 +542,38 @@ func (m *CommonExtensionConfig_StaticConfig) Size() (n int) {
 	}
 	return n
 }
+func (m *CommonExtensionConfig_TdsConfig) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.TdsConfig != nil {
+		l = m.TdsConfig.Size()
+		n += 1 + l + sovCommon(uint64(l))
+	}
+	return n
+}
+func (m *CommonExtensionConfig_TDSConfig) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ConfigSource != nil {
+		l = m.ConfigSource.Size()
+		n += 1 + l + sovCommon(uint64(l))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovCommon(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
 func (m *AdminConfig) Size() (n int) {
 	if m == nil {
 		return 0
@@ -521,6 +701,163 @@ func (m *CommonExtensionConfig) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.ConfigType = &CommonExtensionConfig_StaticConfig{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TdsConfig", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowCommon
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthCommon
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthCommon
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &CommonExtensionConfig_TDSConfig{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ConfigType = &CommonExtensionConfig_TdsConfig{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipCommon(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthCommon
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthCommon
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CommonExtensionConfig_TDSConfig) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowCommon
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TDSConfig: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TDSConfig: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConfigSource", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowCommon
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthCommon
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthCommon
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ConfigSource == nil {
+				m.ConfigSource = &core.ConfigSource{}
+			}
+			if err := m.ConfigSource.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowCommon
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthCommon
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthCommon
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
